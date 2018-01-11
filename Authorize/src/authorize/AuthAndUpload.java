@@ -99,9 +99,7 @@ public class AuthAndUpload {
         DbxAuthInfo authInfo = new DbxAuthInfo(accessToken, appInfo.getHost());
         File output = new File(path);
         try {
-            JsonGenerator gen = jsonFactory.createGenerator(new FileOutputStream(output));
-            gen.writeStartObject();
-            gen.
+            DbxAuthInfo.Writer.writeToFile(authInfo, output);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
