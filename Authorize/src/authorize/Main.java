@@ -9,7 +9,8 @@ import com.dropbox.client2.exception.DropboxException;
  */
 public class Main {
     public static void main(String[] args) throws DropboxException {
-        AuthAndUpload a = new AuthAndUpload();
+        //Unir referências de arquivo
+        Auth a = new Auth();
         a.run();
     }
 }
