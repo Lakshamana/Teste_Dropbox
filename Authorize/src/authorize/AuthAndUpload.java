@@ -55,9 +55,9 @@ public class AuthAndUpload {
 
     private static String getStorageFullPath() {
         if (isWindows()) 
-            return System.getProperty("user.home") + "\\.credentials\\" + APP_NAME;
+            return System.getProperty("user.home") + "\\.credentials\\" + APP_NAME + "\\";
         else 
-            return System.getProperty("user.home") + "/.credentials/" + APP_NAME;
+            return System.getProperty("user.home") + "/.credentials/" + APP_NAME + "/";
     }
     
     private void getAuth(){   
@@ -93,21 +93,22 @@ public class AuthAndUpload {
             System.exit(1); 
         }
     }
-    
-    private JsonFactory jsonFactory = new JsonFactory();     
+      
     private void saveAuthDataToFile(String path){
         DbxAuthInfo authInfo = new DbxAuthInfo(accessToken, appInfo.getHost());
         File output = new File(path);
+        output.setWritable(Boolean.TRUE, Boolean.TRUE);
         try {
             DbxAuthInfo.Writer.writeToFile(authInfo, output);
+            System.out.println("Credenciais salvas em \"" + output.getAbsolutePath() + "\".");
         } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        try {
-            System.out.println("Credentials saved to \"" + output.getCanonicalPath() + "\".");
-        } catch (IOException ex) {
-            System.err.println("Error in saving file " + 
-                    "Dumping to stderr instead:\n" + authInfo.toString());
+            try {
+                System.err.println("Não pôde salvar arquivo. Lançando em stderr:");
+                DbxAuthInfo.Writer.writeToStream(authInfo, System.err);
+                System.err.println();
+            } catch (IOException ex1) {
+                ex1.printStackTrace();
+            }
             ex.printStackTrace();
             System.exit(1);
         }
@@ -116,6 +117,6 @@ public class AuthAndUpload {
     private static final String STORAGE_PATH = createFolderIfNotExists(getStorageFullPath());
     public void run() {
         getAuth();
-        saveAuthDataToFile(STORAGE_PATH);
+        saveAuthDataToFile(STORAGE_PATH + "credential.auth");
     }
 }
