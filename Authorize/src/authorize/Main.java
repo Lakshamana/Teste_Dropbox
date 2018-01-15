@@ -11,6 +11,8 @@ public class Main {
     public static void main(String[] args) throws DropboxException {
         //Unir referências de arquivo
         Auth a = new Auth();
+        Uploader u = new Uploader();
         a.run();
+        u.run();
     }
 }

@@ -5,6 +5,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.NetworkIOException;
 import com.dropbox.core.RetryException;
+import com.dropbox.core.json.JsonReader;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.CommitInfo;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -13,10 +14,12 @@ import com.dropbox.core.v2.files.UploadSessionCursor;
 import com.dropbox.core.v2.files.UploadSessionFinishErrorException;
 import com.dropbox.core.v2.files.UploadSessionLookupErrorException;
 import com.dropbox.core.v2.files.WriteMode;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Date;
 
 public class Uploader {
@@ -47,13 +50,14 @@ public class Uploader {
 
             System.out.println(metadata.toStringMultiline());
         } catch (UploadErrorException ex) {
-            System.err.println("Erro em upload para o Dropbox: " + ex.getMessage());
+            System.err.println("Erro 1 em upload para o Dropbox: " + ex.getMessage());
+            ex.printStackTrace();
             System.exit(1);
         } catch (DbxException ex) {
-            System.err.println("Erro em upload para o Dropbox: " + ex.getMessage());
+            System.err.println("Erro 2 em upload para o Dropbox: " + ex.getMessage());
             System.exit(1);
         } catch (IOException ex) {
-            System.err.println("Erro lendo arquivo \"" + localFile + "\": " + ex.getMessage());
+            System.err.println("Erro 1 lendo arquivo \"" + localFile + "\": " + ex.getMessage());
             System.exit(1);
         }
     }
@@ -152,7 +156,7 @@ public class Uploader {
                     continue;
                 } else {
                     // Some other error occurred, give up.
-                    System.err.println("Erro em upload para o Dropbox:: " + ex.getMessage());
+                    System.err.println("Erro 3 em upload para o Dropbox: " + ex.getMessage());
                     System.exit(1);
                     return;
                 }
@@ -168,16 +172,16 @@ public class Uploader {
                     continue;
                 } else {
                     // some other error occurred, give up.
-                    System.err.println("Erro em upload para o Dropbox: " + ex.getMessage());
+                    System.err.println("Erro 4 em upload para o Dropbox: " + ex.getMessage());
                     System.exit(1);
                     return;
                 }
             } catch (DbxException ex) {
-                System.err.println("Erro em upload para o Dropbox: " + ex.getMessage());
+                System.err.println("Erro 5 em upload para o Dropbox: " + ex.getMessage());
                 System.exit(1);
                 return;
             } catch (IOException ex) {
-                System.err.println("Erro lendo arquivo \"" + localFile + "\": " + ex.getMessage());
+                System.err.println("Erro 2 lendo arquivo \"" + localFile + "\": " + ex.getMessage());
                 System.exit(1);
                 return;
             }
@@ -204,7 +208,7 @@ public class Uploader {
     
     private void selectAndDoUpload(DbxAuthInfo authInfo, File localFile, String dropboxPath){
         // Create a DbxClientV2, which is what you use to make API calls.
-        DbxRequestConfig requestConfig = new DbxRequestConfig("examples-upload-file");
+        DbxRequestConfig requestConfig = new DbxRequestConfig("apseeUploader");
         DbxClientV2 dbxClient = new DbxClientV2(requestConfig, authInfo.getAccessToken(), authInfo.getHost());
 
         // upload the file with simple upload API if it is small enough, otherwise use chunked
@@ -217,7 +221,37 @@ public class Uploader {
         }
     }
     
+    private DbxAuthInfo authInfo;
+
+    public DbxAuthInfo getAuthInfo() {
+        return authInfo;
+    }
+    
+    private void readAuthFromFile(File file){
+        try {
+            authInfo = DbxAuthInfo.Reader.readFromFile(file.getCanonicalPath());
+        } catch (JsonReader.FileLoadException | IOException ex) {
+            System.err.println("Error loading <auth-file>: " + ex.getMessage());
+            System.exit(1);
+        }
+    }
+    
+    private File promptUsuario(){
+        System.out.println("Digite o caminho do arquivo a ser feito o upload: ");
+        String path = null;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            path = br.readLine();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return new File(path);
+    }
+    
+    
     public void run(){
-        
+        File file = promptUsuario(); 
+        readAuthFromFile(new File(Auth.getAuthFile()));
+        selectAndDoUpload(getAuthInfo(), file, "/apseeLoaded/" + file.getName());
     }
 }

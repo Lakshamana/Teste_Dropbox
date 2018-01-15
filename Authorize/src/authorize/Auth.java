@@ -26,14 +26,7 @@ public class Auth {
     private String userId;
     private final String DATA_INFO_PATH = "src/resrc/test.app";
     private DbxAppInfo appInfo;
-    
-    private static String OS = null;
-    public static String getOsName() {
-        if (OS == null) {
-            OS = System.getProperty("os.name");
-        }
-        return OS;
-    }
+    private DbxAuthInfo authInfo;
 
     private static String createFolderIfNotExists(String path) {
         java.io.File file = new java.io.File(path);
@@ -42,12 +35,8 @@ public class Auth {
         return path;
     }
 
-    public static boolean isWindows() {
-        return getOsName().toLowerCase().startsWith("windows");
-    }
-
     private static String getStorageFullPath() {
-        if (isWindows()) 
+        if (SystemInfo.isWindows()) 
             return System.getProperty("user.home") + "\\.credentials\\" + APP_NAME + "\\";
         else 
             return System.getProperty("user.home") + "/.credentials/" + APP_NAME + "/";
@@ -88,7 +77,7 @@ public class Auth {
     }
       
     private void saveAuthDataToFile(String path){
-        DbxAuthInfo authInfo = new DbxAuthInfo(accessToken, appInfo.getHost());
+        authInfo = new DbxAuthInfo(accessToken, appInfo.getHost());
         File output = new File(path);
         output.setWritable(Boolean.TRUE, Boolean.TRUE);
         try {
@@ -108,8 +97,15 @@ public class Auth {
     }
     
     private static final String STORAGE_PATH = createFolderIfNotExists(getStorageFullPath());
+    private static final String AUTH_FILEPATH = STORAGE_PATH + "credential.auth";
     public void run() {
-        getAuth();
-        saveAuthDataToFile(STORAGE_PATH + "credential.auth");
+        if(AUTH_FILEPATH == null){
+            getAuth();
+            saveAuthDataToFile(AUTH_FILEPATH);
+        }
+    }
+    
+    public static String getAuthFile(){
+        return AUTH_FILEPATH;
     }
 }
