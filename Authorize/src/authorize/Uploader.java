@@ -78,7 +78,7 @@ public class Uploader {
         // assert our file is at least the chunk upload size. We make this assumption in the code
         // below to simplify the logic.
         if (size < CHUNKED_UPLOAD_CHUNK_SIZE) {
-            System.err.println("Arquivo pequeno use uploadFile() no lugar desse.");
+            System.err.println("Arquivo pequeno, Use uploadFile(...) no lugar desse.");
             System.exit(1);
             return;
         }
@@ -88,7 +88,7 @@ public class Uploader {
 
         // Chunked uploads have 3 phases, each of which can accept uploaded bytes:
         //
-        //    (1)  Start: initiate the upload and get an upload session ID
+        //    (1) Start: initiate the upload and get an upload session ID
         //    (2) Append: upload chunks of the file to append to our session
         //    (3) Finish: commit the upload and close the session
         //
@@ -96,7 +96,7 @@ public class Uploader {
         String sessionId = null;
         for (int i = 0; i < CHUNKED_UPLOAD_MAX_ATTEMPTS; ++i) {
             if (i > 0) {
-                System.out.printf("Tentando novamenete upload dividido(%d / %d tentativas)\n", 
+                System.out.printf("Tentando novamente upload em partes(%d / %d tentativas)\n", 
                         i + 1, CHUNKED_UPLOAD_MAX_ATTEMPTS);
             }
 
@@ -222,7 +222,6 @@ public class Uploader {
     }
     
     private DbxAuthInfo authInfo;
-
     public DbxAuthInfo getAuthInfo() {
         return authInfo;
     }
@@ -250,8 +249,8 @@ public class Uploader {
     
     
     public void run(){
-        File file = promptUsuario(); 
-        readAuthFromFile(new File(Auth.getAuthFile()));
-        selectAndDoUpload(getAuthInfo(), file, "/apseeLoaded/" + file.getName());
+        File file = promptUsuario();
+        readAuthFromFile(Auth.getAuthFile());
+        selectAndDoUpload(getAuthInfo(), file.getAbsoluteFile(), "/apseeLoaded/" + file.getName());
     }
 }

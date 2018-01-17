@@ -75,12 +75,12 @@ public class Auth {
             System.exit(1); 
         }
     }
-      
-    private void saveAuthDataToFile(String path){
+    
+    private File saveAuthDataToFile(String path){
         authInfo = new DbxAuthInfo(accessToken, appInfo.getHost());
-        File output = new File(path);
-        output.setWritable(Boolean.TRUE, Boolean.TRUE);
+        File output = null;
         try {
+            output = new File(path);
             DbxAuthInfo.Writer.writeToFile(authInfo, output);
             System.out.println("Credenciais salvas em \"" + output.getAbsolutePath() + "\".");
         } catch (IOException ex) {
@@ -94,18 +94,20 @@ public class Auth {
             ex.printStackTrace();
             System.exit(1);
         }
+        return output;
     }
     
-    private static final String STORAGE_PATH = createFolderIfNotExists(getStorageFullPath());
-    private static final String AUTH_FILEPATH = STORAGE_PATH + "credential.auth";
+    private static final String STORAGE_PATH = 
+            createFolderIfNotExists(getStorageFullPath()) + "credential.auth";
+    private static File AUTH_FILE = new File(STORAGE_PATH);
     public void run() {
-        if(AUTH_FILEPATH == null){
+        if(!AUTH_FILE.exists()){
             getAuth();
-            saveAuthDataToFile(AUTH_FILEPATH);
+            AUTH_FILE = saveAuthDataToFile(STORAGE_PATH);
         }
     }
     
-    public static String getAuthFile(){
-        return AUTH_FILEPATH;
+    public static File getAuthFile() {
+        return AUTH_FILE;
     }
 }
